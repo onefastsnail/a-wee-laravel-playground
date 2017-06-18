@@ -1,0 +1,44 @@
+mysql:
+    image: mariadb:latest
+    container_name: mysql
+    ports:
+        - 3306:3306
+    volumes:
+        - ~/dbs/laravel/data/mariadb:/var/lib/mysql
+    env_file:
+        - env/.env
+
+nginx:
+    build: ./nginx/
+    ports:
+        - 80:80
+    links:
+        - php
+    volumes_from:
+        - app
+
+php:
+    build: ./php/
+    expose:
+        - 9000
+    links:
+        - mysql
+    volumes_from:
+        - app
+    env_file:
+        - env/.env
+
+app:
+    image: alpine:latest
+    volumes:
+        - ./app:/var/www/html
+    command: "true"
+
+phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+        - 8080:80
+    links:
+        - mysql
+    environment:
+        PMA_HOST: mysql
